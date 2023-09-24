@@ -13,5 +13,5 @@ fi
 if [ -z "$PASSIVE" ]; then
   export PASSIVE="1"
 fi
-
+export FINGERPRINT="LEXUS LS"
 export STAGING_ROOT="/data/safe_staging"
