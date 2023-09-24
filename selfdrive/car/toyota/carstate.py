@@ -195,8 +195,8 @@ class CarState(CarStateBase):
     if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
       messages.append(("DSU_CRUISE", 5))
       messages.append(("PCM_CRUISE_ALT", 1))
-    else:
-      messages.append(("PCM_CRUISE_2", 33))
+    # else:
+    #   messages.append(("PCM_CRUISE_2", 33))
 
     # add gas interceptor reading if we are using it
     if CP.enableGasInterceptor:
