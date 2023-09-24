@@ -63,12 +63,20 @@ class CarState(CarStateBase):
       ret.gas = cp.vl[msg]["GAS_PEDAL"]
       #ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
 
+    	#Lexus_LS specific wheel speeds 
     ret.wheelSpeeds = self.get_wheel_speeds(
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"],
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"],
-    )
+      cp.vl["WHEEL_SPEED_1"]["WHEEL_SPEED_FL"],
+      cp.vl["WHEEL_SPEED_1"]["WHEEL_SPEED_FR"],
+      cp.vl["WHEEL_SPEED_2"]["WHEEL_SPEED_RL"],
+      cp.vl["WHEEL_SPEED_2"]["WHEEL_SPEED_RR"],
+	) 
+
+    # ret.wheelSpeeds = self.get_wheel_speeds(
+    #   cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
+    #   cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
+    #   cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"],
+    #   cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"],
+    # )
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
