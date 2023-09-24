@@ -214,10 +214,10 @@ class CarState(CarStateBase):
         ("PCS_HUD", 1),
       ]
 
-    if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
-      messages += [
-        ("PRE_COLLISION", 33),
-      ]
+    # if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
+    #   messages += [
+    #     ("PRE_COLLISION", 33),
+    #   ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
 
@@ -230,11 +230,11 @@ class CarState(CarStateBase):
         ("LKAS_HUD", 1),
       ]
 
-    if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
-      messages += [
-        ("PRE_COLLISION", 33),
-        ("ACC_CONTROL", 33),
-        ("PCS_HUD", 1),
-      ]
+    # if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
+    #   messages += [
+    #     ("PRE_COLLISION", 33),
+    #     ("ACC_CONTROL", 33),
+    #     ("PCS_HUD", 1),
+    #   ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
