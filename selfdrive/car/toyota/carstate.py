@@ -148,7 +148,7 @@ class CarState(CarStateBase):
     #if self.CP.carFingerprint not in (NO_STOP_TIMER_CAR - TSS2_CAR):
       # ignore standstill state in certain vehicles, since pcm allows to restart with just an acceleration request
 	#Lexus_LS does not have a cruise CAN signal that indicates standstill															  
-      ret.cruiseState.standstill = self.pcm_acc_status == 0 #7
+    ret.cruiseState.standstill = self.pcm_acc_status == 0 #7
     ret.cruiseState.enabled = bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
     #ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in (1, 2, 3, 4, 5, 6)
 
