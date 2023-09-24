@@ -225,10 +225,10 @@ class CarState(CarStateBase):
   def get_cam_can_parser(CP):
     messages = []
 
-    if CP.carFingerprint != CAR.PRIUS_V:
-      messages += [
-        ("LKAS_HUD", 1),
-      ]
+    # if CP.carFingerprint != CAR.PRIUS_V:
+    #   messages += [
+    #     ("LKAS_HUD", 1),
+    #   ]
 
     # if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
     #   messages += [
