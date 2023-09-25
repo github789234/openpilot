@@ -30,7 +30,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
     self.shifter_values = can_define.dv["GEAR_PACKET"]["GEAR"]
-    self.eps_torque_scale = 1.8 #EPS_SCALE[CP.carFingerprint] / 100.
+    self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
 
@@ -63,7 +63,7 @@ class CarState(CarStateBase):
       ret.gas = cp.vl[msg]["GAS_PEDAL"]
       #ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
 
-    	#Lexus_LS specific wheel speeds 
+    #Lexus_LS specific wheel speeds 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEED_1"]["WHEEL_SPEED_FL"],
       cp.vl["WHEEL_SPEED_1"]["WHEEL_SPEED_FR"],
@@ -82,7 +82,8 @@ class CarState(CarStateBase):
     ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
 
     ret.standstill = ret.vEgoRaw == 0
-
+	
+	#Lexus LS SAS outputs does not support fractional angle. SAS just outputs an erroneous value. So, do not include.
     ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
     torque_sensor_angle_deg = cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
@@ -99,7 +100,9 @@ class CarState(CarStateBase):
         ret.steeringAngleOffsetDeg = self.angle_offset.x
         ret.steeringAngleDeg = torque_sensor_angle_deg - self.angle_offset.x
 
-    ret.steeringRateDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
+	#Lexus LS SAS outputs errenous value for steering angle rate
+	#However, EPS calcuates its own steering angle rate and will set fault in LKA STATE msg
+    ret.steeringRateDeg = 0#cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
 
     can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
@@ -177,6 +180,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parser(CP):
+  #Make sure msg rates are accurate or OP will report "TIMED OUT" error even if 
+  #you have correct rate value set in the Panda safety code.
     messages = [
       ("GEAR_PACKET", 1),
       ("LIGHT_STALK", 1),
@@ -190,7 +195,7 @@ class CarState(CarStateBase):
       ("WHEEL_SPEED_2", 83),
       #("WHEEL_SPEEDS", 80),
       ("STEER_ANGLE_SENSOR", 80),
-      ("PCM_CRUISE", 33),
+      ("PCM_CRUISE", 1), #Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
       #("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
     ]
@@ -198,7 +203,8 @@ class CarState(CarStateBase):
     if CP.flags & ToyotaFlags.HYBRID:
       messages.append(("GAS_PEDAL_HYBRID", 33))
     else:
-      messages.append(("GAS_PEDAL", 33))
+	  #Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
+      messages.append(("GAS_PEDAL", 2))
 
     if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
       messages.append(("DSU_CRUISE", 5))
