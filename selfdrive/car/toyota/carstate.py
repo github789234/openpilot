@@ -124,7 +124,7 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
       # TODO: find the bit likely in DSU_CRUISE that describes an ACC fault. one may also exist in CLUTCH
-      ret.cruiseState.available = cp.vl["DSU_CRUISE"]["MAIN_ON"] != 0
+      #ret.cruiseState.available = cp.vl["DSU_CRUISE"]["MAIN_ON"] != 0
       ret.cruiseState.speed = cp.vl["DSU_CRUISE"]["SET_SPEED"] * CV.KPH_TO_MS
       cluster_set_speed = cp.vl["PCM_CRUISE_ALT"]["UI_SET_SPEED"]
     else:
@@ -133,6 +133,8 @@ class CarState(CarStateBase):
       #ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
 	  #Lexus_LS UI_SET_SPEED is on PCM_CRUISE msg									
       cluster_set_speed = cp.vl["PCM_CRUISE"]["UI_SET_SPEED"]
+	  
+	ret.cruiseState.available = True
 
     # UI_SET_SPEED is always non-zero when main is on, hide until first enable
     if ret.cruiseState.speed != 0:
