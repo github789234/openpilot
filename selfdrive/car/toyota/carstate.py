@@ -134,7 +134,7 @@ class CarState(CarStateBase):
 	  #Lexus_LS UI_SET_SPEED is on PCM_CRUISE msg									
       cluster_set_speed = cp.vl["PCM_CRUISE"]["UI_SET_SPEED"]
 	  
-	ret.cruiseState.available = True
+    ret.cruiseState.available = True
 
     # UI_SET_SPEED is always non-zero when main is on, hide until first enable
     if ret.cruiseState.speed != 0:
