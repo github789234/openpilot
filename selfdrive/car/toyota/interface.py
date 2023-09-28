@@ -184,7 +184,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.0  # not optimized
       tire_stiffness_factor = 0.8  # not optimized yet
       ret.mass = 4707. * CV.LB_TO_KG + 136 #STD_CARGO_KG=136  # mean between min and max
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, use_steering_angle=True)
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, use_steering_angle=False)
 
     elif candidate == CAR.PRIUS_TSS2:
       ret.wheelbase = 2.70002  # from toyota online sepc.
