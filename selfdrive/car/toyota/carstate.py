@@ -187,7 +187,7 @@ class CarState(CarStateBase):
     messages = [
       ("GEAR_PACKET", 1),
       ("LIGHT_STALK", 1),
-      ("BLINKERS_STATE", 0.15),
+      ("BLINKERS_STATE", 3.3),
       ("BODY_CONTROL_STATE", 3),
       ("BODY_CONTROL_STATE_2", 2),
       ("ESP_CONTROL", 3),
