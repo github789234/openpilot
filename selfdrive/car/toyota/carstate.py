@@ -199,7 +199,7 @@ class CarState(CarStateBase):
       ("STEER_ANGLE_SENSOR", 80),
       ("PCM_CRUISE", 1), #Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
       #("PCM_CRUISE_SM", 1),
-      ("STEER_TORQUE_SENSOR", 50),
+      #("STEER_TORQUE_SENSOR", 50),
     ]
 
     if CP.flags & ToyotaFlags.HYBRID:
@@ -241,6 +241,7 @@ class CarState(CarStateBase):
   def get_cam_can_parser(CP):
     messages = []
 
+    messages += [("STEER_TORQUE_SENSOR", 50)]
     # if CP.carFingerprint != CAR.PRIUS_V:
     #   messages += [
     #     ("LKAS_HUD", 1),
