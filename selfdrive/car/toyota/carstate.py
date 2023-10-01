@@ -62,6 +62,8 @@ class CarState(CarStateBase):
       msg = "GAS_PEDAL_HYBRID" if (self.CP.flags & ToyotaFlags.HYBRID) else "GAS_PEDAL"
       ret.gas = cp_cam.vl[msg]["GAS_PEDAL"]
       #ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
+      # For Lexus_LS since gas pedal value is normalized, just use gas pedal value greater than 0 to set gas pressed equal to 1
+      ret.gasPressed = ret.gas > 0
 
     #Lexus_LS specific wheel speeds 
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -206,9 +208,9 @@ class CarState(CarStateBase):
       messages.append(("GAS_PEDAL_HYBRID", 33))
 
 
-    if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
-      messages.append(("DSU_CRUISE", 5))
-      messages.append(("PCM_CRUISE_ALT", 1))
+    # if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
+    #   messages.append(("DSU_CRUISE", 5))
+    #   messages.append(("PCM_CRUISE_ALT", 1))
     # else:
     #   messages.append(("PCM_CRUISE_2", 33))
 
