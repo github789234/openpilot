@@ -52,7 +52,7 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
     ret.parkingBrake = cp.vl["BODY_CONTROL_STATE"]["PARKING_BRAKE"] == 1
 
-    ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
+    ret.brakePressed = cp_cam.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     ret.brakeHoldActive = cp.vl["ESP_CONTROL"]["BRAKE_HOLD_ACTIVE"] == 1
     if self.CP.enableGasInterceptor:
       ret.gas = (cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS"] + cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS2"]) // 2
@@ -84,8 +84,8 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw == 0
 	
 	#Lexus LS SAS outputs does not support fractional angle. SAS just outputs an erroneous value. So, do not include.
-    ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
-    torque_sensor_angle_deg = cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
+    ret.steeringAngleDeg = cp_cam.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
+    torque_sensor_angle_deg = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
     # On some cars, the angle measurement is non-zero while initializing
     if abs(torque_sensor_angle_deg) > 1e-3 and not bool(cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE_INITIALIZING"]):
@@ -106,11 +106,11 @@ class CarState(CarStateBase):
 
     can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
-    ret.leftBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 5
-    ret.rightBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 10
+    ret.leftBlinker = cp_cam.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 5
+    ret.rightBlinker = cp_cam.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 10
 
     ret.steeringTorque = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
-    ret.steeringTorqueEps = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"] * 1.8 #self.eps_torque_scale
+    ret.steeringTorqueEps = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"] * 1.8 #self.eps_torque_scale
     # we could use the override bit from dbc, but it's triggered at too high torque values
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
 
@@ -187,16 +187,16 @@ class CarState(CarStateBase):
     messages = [
       ("GEAR_PACKET", 1),
       ("LIGHT_STALK", 1),
-      ("BLINKERS_STATE", 3.3),
+      #("BLINKERS_STATE", 3.3),
       ("BODY_CONTROL_STATE", 3),
       ("BODY_CONTROL_STATE_2", 2),
       ("ESP_CONTROL", 3),
       ("EPS_STATUS", 25),
-      ("BRAKE_MODULE", 40),
+      #("BRAKE_MODULE", 40),
 	    ("WHEEL_SPEED_1", 83),
       ("WHEEL_SPEED_2", 83),
       #("WHEEL_SPEEDS", 80),
-      ("STEER_ANGLE_SENSOR", 80),
+      #("STEER_ANGLE_SENSOR", 80),
       ("PCM_CRUISE", 1), #Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
       #("PCM_CRUISE_SM", 1),
       #("STEER_TORQUE_SENSOR", 50),
@@ -241,7 +241,10 @@ class CarState(CarStateBase):
   def get_cam_can_parser(CP):
     messages = []
 
-    messages += [("STEER_TORQUE_SENSOR", 50)]
+    messages += [("STEER_TORQUE_SENSOR", 50),
+                 ("STEER_ANGLE_SENSOR", 80),
+                 ("BLINKERS_STATE", 3.3),
+                 ("BRAKE_MODULE", 40),]
     # if CP.carFingerprint != CAR.PRIUS_V:
     #   messages += [
     #     ("LKAS_HUD", 1),
