@@ -132,11 +132,12 @@ class CarState(CarStateBase):
     else:
       #ret.accFaulted = cp.vl["PCM_CRUISE_2"]["ACC_FAULTED"] != 0
       #ret.cruiseState.available = cp.vl["PCM_CRUISE_2"]["MAIN_ON"] != 0
+	  ret.cruiseState.available = True
       #ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
 	  #Lexus_LS UI_SET_SPEED is on PCM_CRUISE msg									
       cluster_set_speed = cp_cam.vl["PCM_CRUISE"]["UI_SET_SPEED"]
 	  
-    ret.cruiseState.available = True
+    
 
     # UI_SET_SPEED is always non-zero when main is on, hide until first enable
     if ret.cruiseState.speed != 0:
@@ -162,8 +163,9 @@ class CarState(CarStateBase):
     self.pcm_acc_status = 8 #cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
     #if self.CP.carFingerprint not in (NO_STOP_TIMER_CAR - TSS2_CAR):
       # ignore standstill state in certain vehicles, since pcm allows to restart with just an acceleration request
-	#Lexus_LS does not have a cruise CAN signal that indicates standstill															  
-    ret.cruiseState.standstill = self.pcm_acc_status == 0 #7
+	  #Lexus_LS does not have a cruise CAN signal that indicates standstill, so use wheel speeds
+    ret.cruiseState.standstill = ret.vEgoRaw == 0	
+    #ret.cruiseState.standstill = self.pcm_acc_status == 0 #7
     ret.cruiseState.enabled = bool(cp_cam.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
     #ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in (1, 2, 3, 4, 5, 6)
 
