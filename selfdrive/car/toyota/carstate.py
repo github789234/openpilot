@@ -132,10 +132,11 @@ class CarState(CarStateBase):
     else:
       #ret.accFaulted = cp.vl["PCM_CRUISE_2"]["ACC_FAULTED"] != 0
       #ret.cruiseState.available = cp.vl["PCM_CRUISE_2"]["MAIN_ON"] != 0
-	  ret.cruiseState.available = True
-      #ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
-	  #Lexus_LS UI_SET_SPEED is on PCM_CRUISE msg									
+	    ret.cruiseState.available = True
       cluster_set_speed = cp_cam.vl["PCM_CRUISE"]["UI_SET_SPEED"]
+      #ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
+	    #Lexus_LS UI_SET_SPEED is on PCM_CRUISE msg									
+      
 	  
     
 
