@@ -70,8 +70,7 @@ class CarState(CarStateBase):
       cp_cam.vl["WHEEL_SPEED_1"]["WHEEL_SPEED_FL"],
       cp_cam.vl["WHEEL_SPEED_1"]["WHEEL_SPEED_FR"],
       cp_cam.vl["WHEEL_SPEED_2"]["WHEEL_SPEED_RL"],
-      cp_cam.vl["WHEEL_SPEED_2"]["WHEEL_SPEED_RR"],
-	) 
+      cp_cam.vl["WHEEL_SPEED_2"]["WHEEL_SPEED_RR"],) 
 
     # ret.wheelSpeeds = self.get_wheel_speeds(
     #   cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
@@ -102,8 +101,8 @@ class CarState(CarStateBase):
         ret.steeringAngleOffsetDeg = self.angle_offset.x
         ret.steeringAngleDeg = torque_sensor_angle_deg - self.angle_offset.x
 
-	#Lexus LS SAS outputs errenous value for steering angle rate
-	#However, EPS calcuates its own steering angle rate and will set fault in LKA STATE msg
+	  #Lexus LS SAS outputs errenous value for steering angle rate
+	  #However, EPS calcuates its own steering angle rate and will set fault in LKA STATE msg
     ret.steeringRateDeg = 0#cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
 
     can_gear = int(cp_cam.vl["GEAR_PACKET"]["GEAR"])
@@ -130,10 +129,12 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = cp.vl["DSU_CRUISE"]["SET_SPEED"] * CV.KPH_TO_MS
       cluster_set_speed = cp.vl["PCM_CRUISE_ALT"]["UI_SET_SPEED"]
     else:
+      ret.cruiseState.available = True
+      cluster_set_speed = cp_cam.vl["PCM_CRUISE"]["UI_SET_SPEED"]
       #ret.accFaulted = cp.vl["PCM_CRUISE_2"]["ACC_FAULTED"] != 0
       #ret.cruiseState.available = cp.vl["PCM_CRUISE_2"]["MAIN_ON"] != 0
-	    ret.cruiseState.available = True
-      cluster_set_speed = cp_cam.vl["PCM_CRUISE"]["UI_SET_SPEED"]
+	    
+      
       #ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
 	    #Lexus_LS UI_SET_SPEED is on PCM_CRUISE msg									
       
