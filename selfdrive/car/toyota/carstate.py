@@ -85,7 +85,8 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw == 0
 	
 	  #Lexus LS SAS outputs does not support fractional angle. SAS just outputs an erroneous value. So, do not include.
-    ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
+    #ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
+    ret.steeringAngleDeg = cp_cam.vl["STEER_ANGLE_SENSOR_VGRS"]["STEER_ANGLE"]
     torque_sensor_angle_deg = cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
     # On some cars, the angle measurement is non-zero while initializing
@@ -202,7 +203,7 @@ class CarState(CarStateBase):
       #("WHEEL_SPEED_1", 83),	//Gateway'd to CAN1  #0xB0
       #("WHEEL_SPEED_2", 83),	//Gateway'd to CAN1  #0xB2
       #("WHEEL_SPEEDS", 80),
-      ("STEER_ANGLE_SENSOR", 80), #On CAN0
+      #("STEER_ANGLE_SENSOR", 80), #On CAN0
 
       #("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50), #On CAN0
@@ -254,7 +255,8 @@ class CarState(CarStateBase):
                   ("BODY_CONTROL_STATE_2", 2), #0x610
                   ("BODY_CONTROL_STATE", 3),  #0x620
                   ("LIGHT_STALK", 1),         #0x622
-                  ("PCM_CRUISE", 1),]       # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+                  ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+                  ("STEER_ANGLE_SENSOR_VGRS", 83),] #0x26 from RS422 signal sent from SAS to VGRS 
     # if CP.carFingerprint != CAR.PRIUS_V:
     #   messages += [
     #     ("LKAS_HUD", 1),
