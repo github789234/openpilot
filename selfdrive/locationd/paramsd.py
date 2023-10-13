@@ -21,8 +21,8 @@ ROLL_MIN, ROLL_MAX = math.radians(-10), math.radians(10)
 ROLL_LOWERED_MAX = math.radians(8)
 ROLL_STD_MAX = math.radians(1.5)
 LATERAL_ACC_SENSOR_THRESHOLD = 4.0
-OFFSET_MAX = 10.0
-OFFSET_LOWERED_MAX = 8.0
+OFFSET_MAX = 12.0
+OFFSET_LOWERED_MAX = 10.0
 
 
 class ParamsLearner:
