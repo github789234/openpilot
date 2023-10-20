@@ -85,8 +85,11 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw == 0
 	
 	  #Lexus LS SAS outputs does not support fractional angle. SAS just outputs an erroneous value. So, do not include.
-    #ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
+    #If the high res str ang is not available just get the stock str ang
     ret.steeringAngleDeg = cp_cam.vl["STEER_ANGLE_SENSOR_VGRS"]["STEER_ANGLE"]
+    if ret.steeringAngleDeg == None:
+      ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
+      
     torque_sensor_angle_deg = cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
     # On some cars, the angle measurement is non-zero while initializing
@@ -243,6 +246,35 @@ class CarState(CarStateBase):
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)  
 
   @staticmethod
+  def get_cam_can_parser(CP):
+    messages = []
+
+    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0
+                  ("WHEEL_SPEED_2", 83),	#0xB2
+                  ("EPS_STATUS", 25),		  #0x262
+                  ("GEAR_PACKET", 1),		  #0x3B4
+                  ("ESP_CONTROL", 3),     #0x3B7
+                  ("GAS_PEDAL", 2),       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
+                  ("BODY_CONTROL_STATE_2", 2), #0x610
+                  ("BODY_CONTROL_STATE", 3),  #0x620
+                  ("LIGHT_STALK", 1),         #0x622
+                  ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+                  ("STEER_ANGLE_SENSOR_VGRS", 83),] #0x26 from RS422 signal sent from SAS to VGRS 
+    # if CP.carFingerprint != CAR.PRIUS_V:
+    #   messages += [
+    #     ("LKAS_HUD", 1),
+    #   ]
+
+    # if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
+    #   messages += [
+    #     ("PRE_COLLISION", 33),
+    #     ("ACC_CONTROL", 33),
+    #     ("PCS_HUD", 1),
+    #   ]
+
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
+  
+    @staticmethod
   def get_cam_can_parser(CP):
     messages = []
 
