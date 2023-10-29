@@ -110,6 +110,17 @@ class Footnote(Enum):
     "openpilot operates above 28mph for Camry 4CYL L, 4CYL LE and 4CYL SE which don't have Full-Speed Range Dynamic Radar Cruise Control.",
     Column.FSR_LONGITUDINAL)
 
+class CANBUS:
+  # Lateral harness
+  steering = 0
+  private = 1
+  autopilot_steering = 2
+
+  # Longitudinal harness
+  driving = 4
+  radar = 5
+  autopilot_driving = 6
+
 
 @dataclass
 class ToyotaCarInfo(CarInfo):

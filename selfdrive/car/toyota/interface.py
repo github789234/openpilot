@@ -2,7 +2,7 @@ from cereal import car
 from openpilot.common.conversions import Conversions as CV
 from panda import Panda
 from panda.python import uds
-from openpilot.selfdrive.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, NO_DSU_CAR, \
+from openpilot.selfdrive.car.toyota.values import CANBUS, Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, NO_DSU_CAR, \
                                         MIN_ACC_SPEED, EPS_SCALE, EV_HYBRID_CAR, UNSUPPORTED_DSU_CAR, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR
 from openpilot.selfdrive.car import get_safety_config
 from openpilot.selfdrive.car.disable_ecu import disable_ecu
@@ -20,6 +20,21 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
     ret.carName = "toyota"
+    # Check if we have messages on an auxiliary panda, and that 0x280 (ACC_Control) is present on the drving bus
+    # If so, we assume that it is connected to the longitudinal harness.
+    # if (CANBUS.autopilot_driving in fingerprint.keys()) and (0x280 in fingerprint[CANBUS.autopilot_driving].keys()):
+    #   ret.openpilotLongitudinalControl = True
+    #   ret.safetyConfigs = [
+    #     get_safety_config(car.CarParams.SafetyModel.toyota, Panda.FLAG_TOYOTA_SECOND_PANDA),
+    #   ]
+    # else:
+    #   ret.openpilotLongitudinalControl = False
+    #   ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.tesla, 0)]
+
+    get_safety_config(car.CarParams.SafetyModel.toyota, Panda.FLAG_TOYOTA_SECOND_PANDA),
+
+
+
     ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.toyota)]
     ret.safetyConfigs[0].safetyParam = EPS_SCALE[candidate]
 
@@ -179,11 +194,19 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 4070 * CV.LB_TO_KG
 
     elif candidate == CAR.LEXUS_LS:
-      stop_and_go = False
+      stop_and_go = True
       ret.wheelbase = 3.09
       ret.steerRatio = 15.0  # not optimized
       tire_stiffness_factor = 0.8  # not optimized yet
       ret.mass = 4707. * CV.LB_TO_KG + 136.0 #STD_CARGO_KG=136  # mean between min and max
+      # Copied from Tesla
+      # Set kP and kI to 0 over the whole speed range to have the planner accel as actuator command
+      ret.longitudinalTuning.kpBP = [0]
+      ret.longitudinalTuning.kpV = [0]
+      ret.longitudinalTuning.kiBP = [0]
+      ret.longitudinalTuning.kiV = [0]
+      ret.longitudinalActuatorDelayUpperBound = 0.5 # s
+      ret.radarTimeStep = (1.0 / 8) # 8Hz
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, use_steering_angle=True)
 
 
