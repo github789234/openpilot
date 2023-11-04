@@ -9,7 +9,7 @@ from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from openpilot.selfdrive.car.interfaces import CarStateBase
 from openpilot.selfdrive.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
-                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
+                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR, CANBUS
 
 SteerControlType = car.CarParams.SteerControlType
 
@@ -246,13 +246,10 @@ class CarState(CarStateBase):
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)  
 
   @staticmethod
-  def get_cam_can_parser(CP):
+  def get_body_can_parser(CP):
     messages = []
 
-    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0
-                  ("WHEEL_SPEED_2", 83),	#0xB2
-                  ("EPS_STATUS", 25),		  #0x262
-                  ("GEAR_PACKET", 1),		  #0x3B4
+    messages += [ ("GEAR_PACKET", 1),		  #0x3B4
                   ("ESP_CONTROL", 3),     #0x3B7
                   ("GAS_PEDAL", 2),       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
                   ("BODY_CONTROL_STATE_2", 2), #0x610
@@ -272,33 +269,18 @@ class CarState(CarStateBase):
     #     ("PCS_HUD", 1),
     #   ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, body_bus)
   
+
   @staticmethod
-  def get_cam_can_parser(CP):
+  def get_body_can_parser(CP):
     messages = []
 
-    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0
-                  ("WHEEL_SPEED_2", 83),	#0xB2
-                  ("EPS_STATUS", 25),		  #0x262
-                  ("GEAR_PACKET", 1),		  #0x3B4
-                  ("ESP_CONTROL", 3),     #0x3B7
-                  ("GAS_PEDAL", 2),       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
-                  ("BODY_CONTROL_STATE_2", 2), #0x610
-                  ("BODY_CONTROL_STATE", 3),  #0x620
-                  ("LIGHT_STALK", 1),         #0x622
-                  ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
-                  ("STEER_ANGLE_SENSOR_VGRS", 83),] #0x26 from RS422 signal sent from SAS to VGRS 
-    # if CP.carFingerprint != CAR.PRIUS_V:
-    #   messages += [
-    #     ("LKAS_HUD", 1),
-    #   ]
+    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0  On second external panda
+                  ("WHEEL_SPEED_2", 83),	#0xB2  On second external panda
+                  ("EPS_STATUS", 25),]    #0x262 On second external panda
 
-    # if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
-    #   messages += [
-    #     ("PRE_COLLISION", 33),
-    #     ("ACC_CONTROL", 33),
-    #     ("PCS_HUD", 1),
-    #   ]
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, vehicle_driving_bus)
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
+  
+
