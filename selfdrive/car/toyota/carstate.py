@@ -8,8 +8,8 @@ from openpilot.common.realtime import DT_CTRL
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from openpilot.selfdrive.car.interfaces import CarStateBase
-from openpilot.selfdrive.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
-                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR, CANBUS
+from openpilot.selfdrive.car.toyota.values import ToyotaFlags, CANBUS, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
+                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
 
 SteerControlType = car.CarParams.SteerControlType
 
@@ -269,7 +269,7 @@ class CarState(CarStateBase):
     #     ("PCS_HUD", 1),
     #   ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, body_bus)
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
   
 
   @staticmethod
@@ -280,7 +280,7 @@ class CarState(CarStateBase):
                   ("WHEEL_SPEED_2", 83),	#0xB2  On second external panda
                   ("EPS_STATUS", 25),]    #0x262 On second external panda
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, vehicle_driving_bus)
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 6)
 
   
 
