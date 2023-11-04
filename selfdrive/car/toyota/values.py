@@ -112,14 +112,14 @@ class Footnote(Enum):
 
 class CANBUS:
   # Lateral harness
-  steering = 0
-  private = 1
-  autopilot_steering = 2
+  dsu_steering_bus = 0
+  body_bus = 1
+  vehicle_steering = 2
 
   # Longitudinal harness
-  driving = 4
-  radar = 5
-  autopilot_driving = 6
+  dsu_driving_bus = 4
+  radar_bus = 5
+  vehicle_driving_bus = 6
 
 
 @dataclass
