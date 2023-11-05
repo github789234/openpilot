@@ -44,13 +44,13 @@ class CarState(CarStateBase):
     self.acc_type = 1
     #self.lkas_hud = {}
 
-  def update(self, cp, cp_cam):
+  def update(self, cp, cp_cam, cp_body):
     ret = car.CarState.new_message()
 
-    ret.doorOpen = any([cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
-                        cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
-    ret.seatbeltUnlatched = cp_cam.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
-    ret.parkingBrake = cp_cam.vl["BODY_CONTROL_STATE"]["PARKING_BRAKE"] == 1
+    ret.doorOpen = any([cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
+                        cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
+    ret.seatbeltUnlatched = cp_body.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
+    ret.parkingBrake = cp_body.vl["BODY_CONTROL_STATE"]["PARKING_BRAKE"] == 1
 
     ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     ret.brakeHoldActive = False #cp_cam.vl["ESP_CONTROL"]["BRAKE_HOLD_ACTIVE"] == 1
@@ -60,7 +60,7 @@ class CarState(CarStateBase):
     else:
       # TODO: find a new, common signal
       msg = "GAS_PEDAL_HYBRID" if (self.CP.flags & ToyotaFlags.HYBRID) else "GAS_PEDAL"
-      ret.gas = cp_cam.vl[msg]["GAS_PEDAL"]
+      ret.gas = cp_body.vl[msg]["GAS_PEDAL"]
       #ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
       # For Lexus_LS since gas pedal value is normalized, just use gas pedal value greater than 0 to set gas pressed equal to 1
       ret.gasPressed = ret.gas > 0
@@ -86,7 +86,7 @@ class CarState(CarStateBase):
 	
 	  #Lexus LS SAS outputs does not support fractional angle. SAS just outputs an erroneous value. So, do not include.
     #If the high res str ang is not available just get the stock str ang
-    ret.steeringAngleDeg = cp_cam.vl["STEER_ANGLE_SENSOR_VGRS"]["STEER_ANGLE"]
+    ret.steeringAngleDeg = cp_body.vl["STEER_ANGLE_SENSOR_VGRS"]["STEER_ANGLE"]
     if ret.steeringAngleDeg == None:
       ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] #+ cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
       
@@ -109,7 +109,7 @@ class CarState(CarStateBase):
 	  #However, EPS calcuates its own steering angle rate and will set fault in LKA STATE msg
     ret.steeringRateDeg = 0#cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
 
-    can_gear = int(cp_cam.vl["GEAR_PACKET"]["GEAR"])
+    can_gear = int(cp_body.vl["GEAR_PACKET"]["GEAR"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
     ret.leftBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 5
     ret.rightBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 10
@@ -134,7 +134,7 @@ class CarState(CarStateBase):
       cluster_set_speed = cp.vl["PCM_CRUISE_ALT"]["UI_SET_SPEED"]
     else:
       ret.cruiseState.available = True
-      cluster_set_speed = cp_cam.vl["PCM_CRUISE"]["UI_SET_SPEED"]
+      cluster_set_speed = cp_body.vl["PCM_CRUISE"]["UI_SET_SPEED"]
       #ret.accFaulted = cp.vl["PCM_CRUISE_2"]["ACC_FAULTED"] != 0
       #ret.cruiseState.available = cp.vl["PCM_CRUISE_2"]["MAIN_ON"] != 0
 	    
@@ -147,11 +147,11 @@ class CarState(CarStateBase):
 
     # UI_SET_SPEED is always non-zero when main is on, hide until first enable
     if ret.cruiseState.speed != 0:
-      is_metric = cp_cam.vl["BODY_CONTROL_STATE_2"]["UNITS"] in (1, 2)
+      is_metric = cp_body.vl["BODY_CONTROL_STATE_2"]["UNITS"] in (1, 2)
       conversion_factor = CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS
       ret.cruiseState.speedCluster = cluster_set_speed * conversion_factor
 
-    cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
+    cp_acc = cp_body if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
 
     if self.CP.carFingerprint in TSS2_CAR and not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       if not (self.CP.flags & ToyotaFlags.SMART_DSU.value):
@@ -172,11 +172,11 @@ class CarState(CarStateBase):
 	  #Lexus_LS does not have a cruise CAN signal that indicates standstill, so use wheel speeds
     ret.cruiseState.standstill = ret.vEgoRaw == 0	
     #ret.cruiseState.standstill = self.pcm_acc_status == 0 #7
-    ret.cruiseState.enabled = bool(cp_cam.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
+    ret.cruiseState.enabled = bool(cp_body.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
     #ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in (1, 2, 3, 4, 5, 6)
 
-    ret.genericToggle = bool(cp_cam.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
-    ret.espDisabled = cp_cam.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
+    ret.genericToggle = bool(cp_body.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
+    ret.espDisabled = cp_body.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
     #Lexus_LS does not have PRE_COLLISION msg
     #if not self.CP.enableDsu and not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       #ret.stockAeb = bool(cp_acc.vl["PRE_COLLISION"]["PRECOLLISION_ACTIVE"] and cp_acc.vl["PRE_COLLISION"]["FORCE"] < -1e-5)

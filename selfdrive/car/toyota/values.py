@@ -114,7 +114,7 @@ class CANBUS:
   # Lateral harness
   dsu_steering_bus = 0
   body_bus = 1
-  vehicle_steering = 2
+  vehicle_steering_bus = 2
 
   # Longitudinal harness
   dsu_driving_bus = 4
