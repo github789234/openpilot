@@ -273,7 +273,7 @@ class CarState(CarStateBase):
   
 
   @staticmethod
-  def get_body_can_parser(CP):
+  def get_cam_can_parser(CP):
     messages = []
 
     messages += [ ("WHEEL_SPEED_1", 83),	#0xB0  On second external panda
