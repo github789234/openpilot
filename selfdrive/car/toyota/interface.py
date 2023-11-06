@@ -20,20 +20,6 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
     ret.carName = "toyota"
-    # Check if we have messages on an auxiliary panda, and that 0x280 (ACC_Control) is present on the drving bus
-    # If so, we assume that it is connected to the longitudinal harness.
-    # if (CANBUS.autopilot_driving in fingerprint.keys()) and (0x280 in fingerprint[CANBUS.autopilot_driving].keys()):
-    #   ret.openpilotLongitudinalControl = True
-    #   ret.safetyConfigs = [
-    #     get_safety_config(car.CarParams.SafetyModel.toyota, Panda.FLAG_TOYOTA_SECOND_PANDA),
-    #   ]
-    # else:
-    #   ret.openpilotLongitudinalControl = False
-    #   ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.tesla, 0)]
-
-    get_safety_config(car.CarParams.SafetyModel.toyota, Panda.FLAG_TOYOTA_SECOND_PANDA),
-
-
 
     ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.toyota)]
     ret.safetyConfigs[0].safetyParam = EPS_SCALE[candidate]
