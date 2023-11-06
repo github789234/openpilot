@@ -185,14 +185,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.0  # not optimized
       tire_stiffness_factor = 0.8  # not optimized yet
       ret.mass = 4707. * CV.LB_TO_KG + 136.0 #STD_CARGO_KG=136  # mean between min and max
-      # Copied from Tesla
-      # Set kP and kI to 0 over the whole speed range to have the planner accel as actuator command
-      ret.longitudinalTuning.kpBP = [0]
-      ret.longitudinalTuning.kpV = [0]
-      ret.longitudinalTuning.kiBP = [0]
-      ret.longitudinalTuning.kiV = [0]
-      ret.longitudinalActuatorDelayUpperBound = 0.5 # s
-      ret.radarTimeStep = (1.0 / 8) # 8Hz
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, use_steering_angle=True)
 
 
