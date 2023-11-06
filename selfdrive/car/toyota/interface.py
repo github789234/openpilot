@@ -194,7 +194,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 4070 * CV.LB_TO_KG
 
     elif candidate == CAR.LEXUS_LS:
-      stop_and_go = True
+      stop_and_go = False
       ret.wheelbase = 3.09
       ret.steerRatio = 15.0  # not optimized
       tire_stiffness_factor = 0.8  # not optimized yet
