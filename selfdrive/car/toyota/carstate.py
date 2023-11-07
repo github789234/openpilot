@@ -44,13 +44,18 @@ class CarState(CarStateBase):
     self.acc_type = 1
     #self.lkas_hud = {}
 
+  # cp =      steering_bus CAN0 on 1st Panda
+  # cp_cam =  driving_bus CAN0 on 2nd Panda
+  # cp_adas = NeoVI Gtwy CAN1 on 1st Panda
+  # cp_body = NeoVI Gtwy CAN1 on 2nd Panda
+  
   def update(self, cp, cp_cam, cp_body):
     ret = car.CarState.new_message()
 
-    ret.doorOpen = any([cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
-                        cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp_body.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
-    ret.seatbeltUnlatched = cp_body.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
-    ret.parkingBrake = cp_body.vl["BODY_CONTROL_STATE"]["PARKING_BRAKE"] == 1
+    ret.doorOpen = any([cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
+                        cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp_cam.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
+    ret.seatbeltUnlatched = cp_cam.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
+    ret.parkingBrake = cp_cam.vl["BODY_CONTROL_STATE"]["PARKING_BRAKE"] == 1
 
     ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     ret.brakeHoldActive = False #cp_cam.vl["ESP_CONTROL"]["BRAKE_HOLD_ACTIVE"] == 1
@@ -60,10 +65,10 @@ class CarState(CarStateBase):
     else:
       # TODO: find a new, common signal
       msg = "GAS_PEDAL_HYBRID" if (self.CP.flags & ToyotaFlags.HYBRID) else "GAS_PEDAL"
-      ret.gas = cp_body.vl[msg]["GAS_PEDAL"]
+      ret.gas = cp_cam.vl[msg]["GAS_PEDAL"]
       #ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
       # For Lexus_LS since gas pedal value is normalized, just use gas pedal value greater than 0 to set gas pressed equal to 1
-      ret.gasPressed = ret.gas > 0
+      ret.gasPressed = ret.gas > 148
 
     #Lexus_LS specific wheel speeds 
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -109,7 +114,7 @@ class CarState(CarStateBase):
 	  #However, EPS calcuates its own steering angle rate and will set fault in LKA STATE msg
     ret.steeringRateDeg = 0#cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
 
-    can_gear = int(cp_body.vl["GEAR_PACKET"]["GEAR"])
+    can_gear = int(cp_cam.vl["GEAR_PACKET"]["GEAR"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
     ret.leftBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 5
     ret.rightBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 10
@@ -147,7 +152,7 @@ class CarState(CarStateBase):
 
     # UI_SET_SPEED is always non-zero when main is on, hide until first enable
     if ret.cruiseState.speed != 0:
-      is_metric = cp_body.vl["BODY_CONTROL_STATE_2"]["UNITS"] in (1, 2)
+      is_metric = cp_cam.vl["BODY_CONTROL_STATE_2"]["UNITS"] in (1, 2)
       conversion_factor = CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS
       ret.cruiseState.speedCluster = cluster_set_speed * conversion_factor
 
@@ -175,8 +180,8 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = bool(cp_body.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
     #ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in (1, 2, 3, 4, 5, 6)
 
-    ret.genericToggle = bool(cp_body.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
-    ret.espDisabled = cp_body.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
+    ret.genericToggle = bool(cp_cam.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
+    ret.espDisabled = 0 #cp_body.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
     #Lexus_LS does not have PRE_COLLISION msg
     #if not self.CP.enableDsu and not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       #ret.stockAeb = bool(cp_acc.vl["PRE_COLLISION"]["PRECOLLISION_ACTIVE"] and cp_acc.vl["PRE_COLLISION"]["FORCE"] < -1e-5)
@@ -249,14 +254,9 @@ class CarState(CarStateBase):
   def get_body_can_parser(CP):
     messages = []
 
-    messages += [ ("GEAR_PACKET", 1),		  #0x3B4
-                  ("ESP_CONTROL", 3),     #0x3B7
-                  ("GAS_PEDAL", 2),       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
-                  ("BODY_CONTROL_STATE_2", 2), #0x610
-                  ("BODY_CONTROL_STATE", 3),  #0x620
-                  ("LIGHT_STALK", 1),         #0x622
-                  ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+    messages += [ ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
                   ("STEER_ANGLE_SENSOR_VGRS", 83),] #0x26 from RS422 signal sent from SAS to VGRS 
+                  #("ESP_CONTROL", 3),     #0x3B7
     # if CP.carFingerprint != CAR.PRIUS_V:
     #   messages += [
     #     ("LKAS_HUD", 1),
@@ -276,21 +276,25 @@ class CarState(CarStateBase):
   def get_cam_can_parser(CP):
     messages = []
 
-    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0  On second external panda
-                  ("WHEEL_SPEED_2", 83),	#0xB2  On second external panda
-                  ("EPS_STATUS", 25),   #0x262 On second external panda
-                  ("BRAKE_MODULE", 40),]   #0x224 On CAN0 of external panda
+    messages += [ ("GAS_PEDAL", 31),            #0x2C1 CAN0 on Driving BUS
+                  ("BODY_CONTROL_STATE_2", 2),  #0x610 CAN0 on Driving BUS
+                  ("BODY_CONTROL_STATE", 3),    #0x620 CAN0 on Driving BUS
+                  ("LIGHT_STALK", 1),           #0x622 CAN0 on Driving BUS
+                  ("GEAR_PACKET", 1),		        #0x3B4 CAN0 on Driving BUS
+                  ("WHEEL_SPEED_1", 83),	      #0xB0  CAN0 on Driving BUS
+                  ("WHEEL_SPEED_2", 83),	      #0xB2  CAN0 on Driving BUS
+                  ("EPS_STATUS", 25),           #0x262 CAN0 on Driving BUS
+                  ("BRAKE_MODULE", 40),]        #0x224 CAN0 on Driving BUS
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 4)
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 4) #4 = CAN0 on 2nd Pand
   
 
   @staticmethod
   def get_adas_can_parser(CP):
     messages = []
 
-    messages += [ ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
-                  ("GAS_PEDAL", 2),]       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
-
+    messages += [ ("PCM_CRUISE", 1), ]    # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+                  
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 5)
 
