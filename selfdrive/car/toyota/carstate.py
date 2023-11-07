@@ -181,7 +181,7 @@ class CarState(CarStateBase):
     #ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in (1, 2, 3, 4, 5, 6)
 
     ret.genericToggle = bool(cp_cam.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
-    ret.espDisabled = 0 #cp_body.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
+    ret.espDisabled = False #cp_body.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
     #Lexus_LS does not have PRE_COLLISION msg
     #if not self.CP.enableDsu and not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       #ret.stockAeb = bool(cp_acc.vl["PRE_COLLISION"]["PRECOLLISION_ACTIVE"] and cp_acc.vl["PRE_COLLISION"]["FORCE"] < -1e-5)
