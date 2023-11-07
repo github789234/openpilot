@@ -202,7 +202,7 @@ class CarState(CarStateBase):
       #("BODY_CONTROL_STATE_2", 2), //Gateway'd to CAN1
       #("ESP_CONTROL", 3),  //Gateway'd to CAN1
       #("EPS_STATUS", 25), //Gateway'd to CAN1
-      ("BRAKE_MODULE", 40), #On CAN0
+      ("BRAKE_MODULE", 40), #On CAN0 of internal panda
       #("WHEEL_SPEED_1", 83),	//Gateway'd to CAN1  #0xB0
       #("WHEEL_SPEED_2", 83),	//Gateway'd to CAN1  #0xB2
       #("WHEEL_SPEEDS", 80),
@@ -278,9 +278,21 @@ class CarState(CarStateBase):
 
     messages += [ ("WHEEL_SPEED_1", 83),	#0xB0  On second external panda
                   ("WHEEL_SPEED_2", 83),	#0xB2  On second external panda
-                  ("EPS_STATUS", 25),]    #0x262 On second external panda
+                  ("EPS_STATUS", 25),   #0x262 On second external panda
+                  ("BRAKE_MODULE", 40),]   #0x224 On CAN0 of external panda
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 4)
+  
+
+  @staticmethod
+  def get_adas_can_parser(CP):
+    messages = []
+
+    messages += [ ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+                  ("GAS_PEDAL", 2),]       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
+
+
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 5)
 
   
 
