@@ -68,7 +68,7 @@ class CarState(CarStateBase):
       ret.gas = cp_cam.vl[msg]["GAS_PEDAL"]
       #ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
       # For Lexus_LS since gas pedal value is normalized, just use gas pedal value greater than 0 to set gas pressed equal to 1
-      ret.gasPressed = ret.gas > 148
+      ret.gasPressed = ret.gas > 1000 # pedal is really sensative
 
     #Lexus_LS specific wheel speeds 
     ret.wheelSpeeds = self.get_wheel_speeds(
