@@ -195,9 +195,9 @@ class CarState(CarStateBase):
   #Make sure msg rates are accurate or OP will report "TIMED OUT" error even if 
   #you have correct rate value set in the Panda safety code.
     messages = [
-      ("BLINKERS_STATE", 3.3),  # On CAN0
-      ("BRAKE_MODULE", 40), #On CAN0
-      ("STEER_TORQUE_SENSOR", 50),] #On CAN0
+      ("BLINKERS_STATE", 3.3),          #0x650 On Steering BUS
+      ("BRAKE_MODULE", 40),             #0x224 On Steering BUS
+      ("STEER_TORQUE_SENSOR", 50),]     #0x260 On Steering BUS
 
     if CP.flags & ToyotaFlags.HYBRID:
       messages.append(("GAS_PEDAL_HYBRID", 33))
@@ -241,7 +241,7 @@ class CarState(CarStateBase):
                   ("EPS_STATUS", 25),		  #0x262 Gatewayed from Driving BUS
                   ("GEAR_PACKET", 1),		  #0x3B4 Gatewayed from Driving BUS
                   ("ESP_CONTROL", 3),     #0x3B7 Gatewayed from Body BUS
-                  ("GAS_PEDAL", 2),       #0x2C1 Gatewayed from Driving BUS
+                  ("GAS_PEDAL", 31),       #0x2C1 Gatewayed from Driving BUS
                   ("BODY_CONTROL_STATE_2", 2), #0x610 Gatewayed from Driving BUS
                   ("BODY_CONTROL_STATE", 3),  #0x620 Gatewayed from Driving BUS
                   ("LIGHT_STALK", 1),         #0x622 Gatewayed from Driving BUS
