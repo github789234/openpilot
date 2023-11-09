@@ -230,7 +230,7 @@ class CarState(CarStateBase):
     #     ("PRE_COLLISION", 33),
     #   ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 4)  
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)  
 
   @staticmethod
   def get_cam_can_parser(CP):
@@ -259,4 +259,4 @@ class CarState(CarStateBase):
     #     ("PCS_HUD", 1),
     #   ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 5)
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
