@@ -195,22 +195,9 @@ class CarState(CarStateBase):
   #Make sure msg rates are accurate or OP will report "TIMED OUT" error even if 
   #you have correct rate value set in the Panda safety code.
     messages = [
-      #("GEAR_PACKET", 1),   //Gateway'd to CAN1
-      #("LIGHT_STALK", 1),   //Gateway'd to CAN1
       ("BLINKERS_STATE", 3.3),  # On CAN0
-      #("BODY_CONTROL_STATE", 3), //Gateway'd to CAN1
-      #("BODY_CONTROL_STATE_2", 2), //Gateway'd to CAN1
-      #("ESP_CONTROL", 3),  //Gateway'd to CAN1
-      #("EPS_STATUS", 25), //Gateway'd to CAN1
       ("BRAKE_MODULE", 40), #On CAN0
-      #("WHEEL_SPEED_1", 83),	//Gateway'd to CAN1  #0xB0
-      #("WHEEL_SPEED_2", 83),	//Gateway'd to CAN1  #0xB2
-      #("WHEEL_SPEEDS", 80),
-      #("STEER_ANGLE_SENSOR", 80), #On CAN0
-
-      #("PCM_CRUISE_SM", 1),
-      ("STEER_TORQUE_SENSOR", 50), #On CAN0
-    ]
+      ("STEER_TORQUE_SENSOR", 50),] #On CAN0
 
     if CP.flags & ToyotaFlags.HYBRID:
       messages.append(("GAS_PEDAL_HYBRID", 33))
@@ -249,45 +236,16 @@ class CarState(CarStateBase):
   def get_cam_can_parser(CP):
     messages = []
 
-    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0
-                  ("WHEEL_SPEED_2", 83),	#0xB2
-                  ("EPS_STATUS", 25),		  #0x262
-                  ("GEAR_PACKET", 1),		  #0x3B4
-                  ("ESP_CONTROL", 3),     #0x3B7
-                  ("GAS_PEDAL", 2),       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
-                  ("BODY_CONTROL_STATE_2", 2), #0x610
-                  ("BODY_CONTROL_STATE", 3),  #0x620
-                  ("LIGHT_STALK", 1),         #0x622
-                  ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
-                  ("STEER_ANGLE_SENSOR_VGRS", 83),] #0x26 from RS422 signal sent from SAS to VGRS 
-    # if CP.carFingerprint != CAR.PRIUS_V:
-    #   messages += [
-    #     ("LKAS_HUD", 1),
-    #   ]
-
-    # if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
-    #   messages += [
-    #     ("PRE_COLLISION", 33),
-    #     ("ACC_CONTROL", 33),
-    #     ("PCS_HUD", 1),
-    #   ]
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
-  
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = []
-
-    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0
-                  ("WHEEL_SPEED_2", 83),	#0xB2
-                  ("EPS_STATUS", 25),		  #0x262
-                  ("GEAR_PACKET", 1),		  #0x3B4
-                  ("ESP_CONTROL", 3),     #0x3B7
-                  ("GAS_PEDAL", 2),       #0x49B  Lexus LS GAS_PEDAL msg (0x49B) is sent at a 2 Hz rate
-                  ("BODY_CONTROL_STATE_2", 2), #0x610
-                  ("BODY_CONTROL_STATE", 3),  #0x620
-                  ("LIGHT_STALK", 1),         #0x622
-                  ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+    messages += [ ("WHEEL_SPEED_1", 83),	#0xB0 Gatewayed from Driving BUS
+                  ("WHEEL_SPEED_2", 83),	#0xB2 Gatewayed from Driving BUS
+                  ("EPS_STATUS", 25),		  #0x262 Gatewayed from Driving BUS
+                  ("GEAR_PACKET", 1),		  #0x3B4 Gatewayed from Driving BUS
+                  ("ESP_CONTROL", 3),     #0x3B7 Gatewayed from Body BUS
+                  ("GAS_PEDAL", 2),       #0x2C1 Gatewayed from Driving BUS
+                  ("BODY_CONTROL_STATE_2", 2), #0x610 Gatewayed from Driving BUS
+                  ("BODY_CONTROL_STATE", 3),  #0x620 Gatewayed from Driving BUS
+                  ("LIGHT_STALK", 1),         #0x622 Gatewayed from Driving BUS
+                  ("PCM_CRUISE", 1),      # 0x689 Gatewayed from Body BUS; Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
                   ("STEER_ANGLE_SENSOR_VGRS", 83),] #0x26 from RS422 signal sent from SAS to VGRS 
     # if CP.carFingerprint != CAR.PRIUS_V:
     #   messages += [
