@@ -200,34 +200,10 @@ class CarState(CarStateBase):
   #Make sure msg rates are accurate or OP will report "TIMED OUT" error even if 
   #you have correct rate value set in the Panda safety code.
     messages = [
-      #("GEAR_PACKET", 1),   //Gateway'd to CAN1
-      #("LIGHT_STALK", 1),   //Gateway'd to CAN1
-      ("BLINKERS_STATE", 3.3),  # On CAN0
-      #("BODY_CONTROL_STATE", 3), //Gateway'd to CAN1
-      #("BODY_CONTROL_STATE_2", 2), //Gateway'd to CAN1
-      #("ESP_CONTROL", 3),  //Gateway'd to CAN1
-      #("EPS_STATUS", 25), //Gateway'd to CAN1
+      ("BLINKERS_STATE", 3.3),  # On CAN0 to internal PANDA
       ("BRAKE_MODULE", 40), #On CAN0 of internal panda
-      #("WHEEL_SPEED_1", 83),	//Gateway'd to CAN1  #0xB0
-      #("WHEEL_SPEED_2", 83),	//Gateway'd to CAN1  #0xB2
-      #("WHEEL_SPEEDS", 80),
-      #("STEER_ANGLE_SENSOR", 80), #On CAN0
+      ("STEER_TORQUE_SENSOR", 50),] #On CAN0
 
-      #("PCM_CRUISE_SM", 1),
-      ("STEER_TORQUE_SENSOR", 50), #On CAN0
-    ]
-
-    if CP.flags & ToyotaFlags.HYBRID:
-      messages.append(("GAS_PEDAL_HYBRID", 33))
-
-
-    # if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
-    #   messages.append(("DSU_CRUISE", 5))
-    #   messages.append(("PCM_CRUISE_ALT", 1))
-    # else:
-    #   messages.append(("PCM_CRUISE_2", 33))
-
-    # add gas interceptor reading if we are using it
     if CP.enableGasInterceptor:
       messages.append(("GAS_SENSOR", 50))
 
@@ -243,31 +219,16 @@ class CarState(CarStateBase):
         ("PCS_HUD", 1),
       ]
 
-    # if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
-    #   messages += [
-    #     ("PRE_COLLISION", 33),
-    #   ]
-
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)  
 
   @staticmethod
   def get_body_can_parser(CP):
     messages = []
 
-    messages += [ ("PCM_CRUISE", 1),      # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
-                  ("STEER_ANGLE_SENSOR_VGRS", 83),] #0x26 from RS422 signal sent from SAS to VGRS 
-                  #("ESP_CONTROL", 3),     #0x3B7
-    # if CP.carFingerprint != CAR.PRIUS_V:
-    #   messages += [
-    #     ("LKAS_HUD", 1),
-    #   ]
+    messages += [ ("PCM_CRUISE", 1),                   # 0x689 Lexus LS PCM CRUISE msg (0x689) is sent at a 1 Hz rate
+                  ("ESP_CONTROL", 3),                  # 0x3B7 ESP_CONTROL Only seen on BODY_BUS.
+                  ("STEER_ANGLE_SENSOR_VGRS", 83),]    # 0x26 from RS422 signal sent from SAS to VGRS, converted to CAN msg
 
-    # if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
-    #   messages += [
-    #     ("PRE_COLLISION", 33),
-    #     ("ACC_CONTROL", 33),
-    #     ("PCS_HUD", 1),
-    #   ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 1)
   
@@ -283,8 +244,8 @@ class CarState(CarStateBase):
                   ("GEAR_PACKET", 1),		        #0x3B4 CAN0 on Driving BUS
                   ("WHEEL_SPEED_1", 83),	      #0xB0  CAN0 on Driving BUS
                   ("WHEEL_SPEED_2", 83),	      #0xB2  CAN0 on Driving BUS
-                  ("EPS_STATUS", 25),           #0x262 CAN0 on Driving BUS
-                  ("BRAKE_MODULE", 40),]        #0x224 CAN0 on Driving BUS
+                  ("EPS_STATUS", 25),]           #0x262 CAN0 on Driving BUS
+            #
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 4) #4 = CAN0 on 2nd Pand
   
