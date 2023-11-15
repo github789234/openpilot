@@ -20,9 +20,9 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
     ret.carName = "toyota"
-    #ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.toyota)]
-    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.noOutput)]
-    ret.safetyConfigs[0].safetyParam = EPS_SCALE[candidate]
+    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.noOutput),
+                         get_safety_config(car.CarParams.SafetyModel.toyota)]
+    ret.safetyConfigs[1].safetyParam = EPS_SCALE[candidate]
 
     # BRAKE_MODULE is on a different address for these cars
     if DBC[candidate]["pt"] == "toyota_new_mc_pt_generated":
@@ -253,7 +253,7 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
 
     if not ret.openpilotLongitudinalControl:
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_STOCK_LONGITUDINAL
+      ret.safetyConfigs[1].safetyParam |= Panda.FLAG_TOYOTA_STOCK_LONGITUDINAL
 
     # we can't use the fingerprint to detect this reliably, since
     # the EV gas pedal signal can take a couple seconds to appear
