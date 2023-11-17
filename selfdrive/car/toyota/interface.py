@@ -21,7 +21,8 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
     ret.carName = "toyota"
 
-    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.toyota)]
+    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.toyota),
+                         get_safety_config(car.CarParams.SafetyModel.toyota)]
     ret.safetyConfigs[0].safetyParam = EPS_SCALE[candidate]
 
     # BRAKE_MODULE is on a different address for these cars
