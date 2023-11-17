@@ -244,7 +244,7 @@ class CarState(CarStateBase):
                   ("GEAR_PACKET", 1),		        #0x3B4 CAN0 on Driving BUS
                   ("WHEEL_SPEED_1", 83),	      #0xB0  CAN0 on Driving BUS
                   ("WHEEL_SPEED_2", 83),	      #0xB2  CAN0 on Driving BUS
-                  ("EPS_STATUS", 25),]           #0x262 CAN0 on Driving BUS
+                  ("EPS_STATUS", 25),]          #0x262 CAN0 on Driving BUS
             #
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 4) #4 = CAN0 on 2nd Pand
